@@ -13,6 +13,11 @@ variable "vpc_cidr" {
   type        = string
 }
 
+variable "public_subnets" {
+  description = "Public subnet CIDR blocks keyed by AZ."
+  type        = map(string)
+}
+
 variable "enable_dns_support" {
   description = "Enable DNS support for the VPC."
   type        = bool

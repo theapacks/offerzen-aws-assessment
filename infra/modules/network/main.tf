@@ -22,3 +22,17 @@ resource "aws_internet_gateway" "this" {
   })
 }
 
+resource "aws_subnet" "public" {
+  for_each = var.public_subnets
+
+  vpc_id                  = aws_vpc.this.id
+  cidr_block              = each.value
+  availability_zone       = each.key
+  map_public_ip_on_launch = true
+
+  tags = merge(var.tags, {
+    Name = "${local.name_prefix}-public-${each.key}"
+    Tier = "public"
+  })
+}
+

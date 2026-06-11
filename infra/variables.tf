@@ -22,16 +22,13 @@ variable "vpc_cidr" {
   default     = "10.0.0.0/16"
 }
 
-variable "availability_zones" {
-  description = "Two or more AZs used for subnets and high availability."
-  type        = list(string)
-  default     = ["eu-west-1a", "eu-west-1b"]
-}
-
-variable "public_subnet_cidrs" {
-  description = "CIDR blocks for public subnets."
-  type        = list(string)
-  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+variable "public_subnets" {
+  description = "Public subnet CIDR blocks keyed by availability zone."
+  type        = map(string)
+  default = {
+    "eu-west-1a" = "10.0.1.0/24"
+    "eu-west-1b" = "10.0.2.0/24"
+  }
 }
 
 variable "private_subnet_cidrs" {
