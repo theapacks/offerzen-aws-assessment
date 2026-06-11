@@ -25,10 +25,11 @@ variable "vpc_cidr" {
 variable "public_subnets" {
   description = "Public subnet CIDR blocks keyed by availability zone."
   type        = map(string)
-  default = {
-    "eu-west-1a" = "10.0.1.0/24"
-    "eu-west-1b" = "10.0.2.0/24"
-  }
+}
+
+variable "private_subnets" {
+  description = "Private subnet CIDR blocks keyed by availability zone."
+  type        = map(string)
 }
 
 variable "create_internet_gateway" {
