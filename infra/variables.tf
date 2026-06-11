@@ -31,12 +31,6 @@ variable "public_subnets" {
   }
 }
 
-variable "private_subnet_cidrs" {
-  description = "CIDR blocks for private subnets."
-  type        = list(string)
-  default     = ["10.0.11.0/24", "10.0.12.0/24"]
-}
-
 variable "create_internet_gateway" {
   description = "Whether to create an Internet Gateway in the network module."
   type        = bool
