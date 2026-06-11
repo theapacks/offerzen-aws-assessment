@@ -40,6 +40,12 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.11.0/24", "10.0.12.0/24"]
 }
 
+variable "create_internet_gateway" {
+  description = "Whether to create an Internet Gateway in the network module."
+  type        = bool
+  default     = true
+}
+
 variable "additional_tags" {
   description = "Additional resource tags merged with the common tags."
   type        = map(string)
