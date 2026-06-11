@@ -25,6 +25,12 @@ variable "enable_dns_hostnames" {
   default     = true
 }
 
+variable "create_internet_gateway" {
+  description = "Whether to create an Internet Gateway for the VPC."
+  type        = bool
+  default     = true
+}
+
 variable "tags" {
   description = "Common tags to apply to resources."
   type        = map(string)
