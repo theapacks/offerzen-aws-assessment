@@ -32,6 +32,61 @@ variable "private_subnets" {
   type        = map(string)
 }
 
+variable "load_balancers" {
+  description = "Map of load balancer configurations."
+  type = map(object({
+    internal                         = bool
+    subnet_type                      = string # "public" or "private"
+    enable_http                      = optional(bool, true)
+    enable_https                     = optional(bool, false)
+    ssl_certificate_arn              = optional(string, null)
+    target_port                      = optional(number, 80)
+    listener_port                    = optional(number, 80)
+    health_check_path                = optional(string, "/health")
+    health_check_interval            = optional(number, 30)
+    health_check_timeout             = optional(number, 5)
+    health_check_healthy_threshold   = optional(number, 2)
+    health_check_unhealthy_threshold = optional(number, 2)
+    allowed_cidr_blocks              = optional(list(string), ["0.0.0.0/0"])
+  }))
+}
+
+variable "enable_http" {
+  description = "Enable HTTP listener on the load balancer."
+  type        = bool
+  default     = true
+}
+
+variable "enable_https" {
+  description = "Enable HTTPS listener on the load balancer."
+  type        = bool
+  default     = false
+}
+
+variable "ssl_certificate_arn" {
+  description = "ARN of the SSL certificate for HTTPS listener."
+  type        = string
+  default     = null
+}
+
+variable "health_check_path" {
+  description = "Health check endpoint path for the load balancer."
+  type        = string
+  default     = "/health"
+}
+
+variable "enable_internal_alb" {
+  description = "Enable the internal ALB for backend services."
+  type        = bool
+  default     = true
+}
+
+variable "backend_port" {
+  description = "Port for the internal ALB target group."
+  type        = number
+  default     = 8080
+}
+
 variable "create_internet_gateway" {
   description = "Whether to create an Internet Gateway in the network module."
   type        = bool
