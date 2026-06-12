@@ -13,11 +13,11 @@ module "network" {
 module "load_balancer" {
   source = "./modules/load_balancer"
 
-  project_name    = var.project_name
-  environment     = var.environment
-  vpc_id          = module.network.vpc_id
-  vpc_cidr        = var.vpc_cidr
-  load_balancers  = var.load_balancers
+  project_name   = var.project_name
+  environment    = var.environment
+  vpc_id         = module.network.vpc_id
+  vpc_cidr       = var.vpc_cidr
+  load_balancers = var.load_balancers
   subnet_map = {
     public  = module.network.public_subnet_ids
     private = module.network.private_subnet_ids
