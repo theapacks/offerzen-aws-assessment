@@ -4,7 +4,7 @@ output "load_balancers" {
     for name, alb in aws_lb.this : name => {
       arn               = alb.arn
       dns_name          = alb.dns_name
-      security_group_id = aws_security_group.alb[name].id
+      security_group_id = var.security_group_ids[name]
       target_group_arn  = aws_lb_target_group.this[name].arn
       internal          = alb.internal
     }

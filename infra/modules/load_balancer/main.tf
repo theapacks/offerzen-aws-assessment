@@ -1,5 +1,13 @@
 locals {
   name_prefix = "${var.project_name}-${var.environment}"
+  alb_names = {
+    for name, _ in var.load_balancers :
+    name => trimsuffix(substr("${local.name_prefix}-${name}-alb", 0, 32), "-")
+  }
+  target_group_names = {
+    for name, _ in var.load_balancers :
+    name => trimsuffix(substr("${local.name_prefix}-${name}-tg", 0, 32), "-")
+  }
 }
 
 #      _    _     ____      
@@ -11,54 +19,16 @@ locals {
 resource "aws_lb" "this" {
   for_each = var.load_balancers
 
-  name               = "${local.name_prefix}-${each.key}-alb"
+  name               = local.alb_names[each.key]
   internal           = each.value.internal
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb[each.key].id]
+  security_groups    = [var.security_group_ids[each.key]]
   subnets            = var.subnet_map[each.value.subnet_type]
 
   enable_deletion_protection = false
 
   tags = merge(var.tags, {
     Name = "${local.name_prefix}-${each.key}-alb"
-  })
-}
-
-#      _    _     ____    ____                       _ _            ____                       
-#     / \  | |   | __ )  / ___|  ___  ___ _   _ _ __(_) |_ _   _   / ___|_ __ ___  _   _ _ __  
-#    / _ \ | |   |  _ \  \___ \ / _ \/ __| | | | '__| | __| | | | | |  _| '__/ _ \| | | | '_ \ 
-#   / ___ \| |___| |_) |  ___) |  __/ (__| |_| | |  | | |_| |_| | | |_| | | | (_) | |_| | |_) |
-#  /_/   \_\_____|____/  |____/ \___|\___|\__,_|_|  |_|\__|\__, |  \____|_|  \___/ \__,_| .__/ 
-#                                                          |___/                        |_|    
-resource "aws_security_group" "alb" {
-  for_each = var.load_balancers
-
-  name        = "${local.name_prefix}-${each.key}-alb-sg"
-  description = "Security group for ${each.key} ALB"
-  vpc_id      = var.vpc_id
-
-  dynamic "ingress" {
-    for_each = [
-      each.value.enable_http ? { port = each.value.listener_port, protocol = "HTTP" } : null,
-      each.value.enable_https ? { port = 443, protocol = "HTTPS" } : null
-    ]
-    content {
-      from_port   = ingress.value.port
-      to_port     = ingress.value.port
-      protocol    = "tcp"
-      cidr_blocks = each.value.allowed_cidr_blocks
-    }
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = merge(var.tags, {
-    Name = "${local.name_prefix}-${each.key}-alb-sg"
   })
 }
 
@@ -71,7 +41,7 @@ resource "aws_security_group" "alb" {
 resource "aws_lb_target_group" "this" {
   for_each = var.load_balancers
 
-  name        = "${local.name_prefix}-${each.key}-tg"
+  name        = local.target_group_names[each.key]
   port        = each.value.target_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id

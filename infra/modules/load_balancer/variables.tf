@@ -13,11 +13,6 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "vpc_cidr" {
-  description = "VPC CIDR block for security group rules."
-  type        = string
-}
-
 variable "subnet_map" {
   description = "Map of subnet types to their IDs for ALB placement."
   type = object({
@@ -43,6 +38,11 @@ variable "load_balancers" {
     health_check_unhealthy_threshold = optional(number, 2)
     allowed_cidr_blocks              = optional(list(string), ["0.0.0.0/0"])
   }))
+}
+
+variable "security_group_ids" {
+  description = "Map of ALB security group IDs keyed by load balancer name."
+  type        = map(string)
 }
 
 variable "tags" {
