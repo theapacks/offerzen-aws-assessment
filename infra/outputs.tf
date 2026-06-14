@@ -59,3 +59,18 @@ output "internal_alb_security_group_id" {
   value       = try(module.load_balancer.load_balancers["backend"].security_group_id, null)
 }
 
+output "ecr_repository_urls" {
+  description = "ECR repository URLs keyed by tier."
+  value       = { for key, repo in aws_ecr_repository.app : key => repo.repository_url }
+}
+
+output "ecr_backend_repository_url" {
+  description = "ECR repository URL for the backend image."
+  value       = try(aws_ecr_repository.app["backend"].repository_url, null)
+}
+
+output "ecr_ui_repository_url" {
+  description = "ECR repository URL for the UI image."
+  value       = try(aws_ecr_repository.app["ui"].repository_url, null)
+}
+
