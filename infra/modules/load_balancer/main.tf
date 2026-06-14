@@ -45,7 +45,7 @@ resource "aws_lb_target_group" "this" {
   port        = each.value.target_port
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
-  target_type = "instance"
+  target_type = each.value.target_type
 
   health_check {
     healthy_threshold   = each.value.health_check_healthy_threshold
