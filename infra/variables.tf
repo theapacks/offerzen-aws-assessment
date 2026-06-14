@@ -48,6 +48,7 @@ variable "load_balancers" {
     health_check_healthy_threshold   = optional(number, 2)
     health_check_unhealthy_threshold = optional(number, 2)
     allowed_cidr_blocks              = optional(list(string), ["0.0.0.0/0"])
+    target_type                      = optional(string, "instance")
   }))
 }
 
