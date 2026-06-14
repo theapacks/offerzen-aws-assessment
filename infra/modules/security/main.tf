@@ -86,3 +86,30 @@ resource "aws_security_group" "app" {
   })
 }
 
+resource "aws_security_group" "ui_instance" {
+  name        = "${local.name_prefix}-ui-instance-sg"
+  description = "UI compute tier security group"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description     = "Allow UI ALB to reach UI compute instances"
+    from_port       = try(var.ui_listener_ports[0], 80) # Assuming the first port is the one for instances
+    to_port         = try(var.ui_listener_ports[0], 80)
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ui_alb.id]
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(var.tags, {
+    Name = "${local.name_prefix}-ui-instance-sg"
+    Tier = "public"
+  })
+}
+
