@@ -52,6 +52,16 @@ variable "load_balancers" {
   }))
 }
 
+variable "compute_tiers" {
+  description = "Map of compute tier configurations keyed by tier name."
+  type = map(object({
+    instance_type    = string
+    min_size         = number
+    max_size         = number
+    desired_capacity = number
+  }))
+}
+
 variable "enable_http" {
   description = "Enable HTTP listener on the load balancer."
   type        = bool
