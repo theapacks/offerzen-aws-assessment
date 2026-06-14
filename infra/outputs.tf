@@ -1,0 +1,61 @@
+# Network outputs
+output "vpc_id" {
+  description = "VPC ID"
+  value       = module.network.vpc_id
+}
+
+output "vpc_cidr_block" {
+  description = "VPC CIDR block"
+  value       = module.network.vpc_cidr_block
+}
+
+output "public_subnet_ids" {
+  description = "Public subnet IDs"
+  value       = module.network.public_subnet_ids
+}
+
+output "private_subnet_ids" {
+  description = "Private subnet IDs"
+  value       = module.network.private_subnet_ids
+}
+
+output "external_alb_dns_name" {
+  description = "DNS name of the external UI ALB"
+  value       = try(module.load_balancer.load_balancers["ui"].dns_name, null)
+}
+
+output "external_alb_arn" {
+  description = "ARN of the external UI ALB"
+  value       = try(module.load_balancer.load_balancers["ui"].arn, null)
+}
+
+output "external_target_group_arn" {
+  description = "ARN of the external ALB target group"
+  value       = try(module.load_balancer.load_balancer_target_groups["ui"], null)
+}
+
+output "external_alb_security_group_id" {
+  description = "Security group ID for the external ALB"
+  value       = try(module.load_balancer.load_balancers["ui"].security_group_id, null)
+}
+
+output "internal_alb_dns_name" {
+  description = "DNS name of the internal backend ALB"
+  value       = try(module.load_balancer.load_balancers["backend"].dns_name, null)
+}
+
+output "internal_alb_arn" {
+  description = "ARN of the internal backend ALB"
+  value       = try(module.load_balancer.load_balancers["backend"].arn, null)
+}
+
+output "internal_target_group_arn" {
+  description = "ARN of the internal ALB target group"
+  value       = try(module.load_balancer.load_balancer_target_groups["backend"], null)
+}
+
+output "internal_alb_security_group_id" {
+  description = "Security group ID for the internal ALB"
+  value       = try(module.load_balancer.load_balancers["backend"].security_group_id, null)
+}
+
