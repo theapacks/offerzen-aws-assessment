@@ -74,3 +74,8 @@ output "ecr_ui_repository_url" {
   value       = try(aws_ecr_repository.app["ui"].repository_url, null)
 }
 
+output "github_actions_role_arn" {
+  description = "IAM role ARN to set as AWS_ROLE_TO_ASSUME."
+  value       = aws_iam_role.github_actions_ecr.arn
+}
+
