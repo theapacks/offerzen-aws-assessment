@@ -1,0 +1,18 @@
+{
+    "name": "offerzen-aws-assessment-app",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Demo Express app for the OfferZen AWS assessment",
+    "author": {
+        "name": "Mbulaheni Davhana",
+        "url": "https://www.mbulaheni.davhana.com"
+    },
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "start:docker": "node app.js"
+    },
+    "dependencies": {
+        "express": "^4.21.2"
+    }
+}
