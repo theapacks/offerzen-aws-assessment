@@ -1,24 +1,35 @@
 name: UI CI/CD
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - app/src/client/**
-      - .github/workflows/ui.yml
-  workflow_dispatch:
+    push:
+        branches:
+            - main
+        paths:
+            - app/src/client/**
+            - .github/workflows/ui.yml
+    workflow_dispatch:
 
 permissions:
-  id-token: write
-  contents: read
+    id-token: write
+    contents: read
+
+env:
+    AWS_REGION: ${{ vars.AWS_REGION || 'eu-west-2' }}
+    PROJECT_NAME: ${{ vars.PROJECT_NAME || 'offerzen-aws-assessment' }}
+    ENVIRONMENT: ${{ vars.ENVIRONMENT || 'dev' }}
+    AWS_ROLE_TO_ASSUME: ${{ secrets.AWS_ROLE_TO_ASSUME }}
 
 jobs:
-  call-build-and-push:
-    uses: ./.github/workflows/_build-and-push.yml
-    with:
-      app_name: ui
-      context: ./app/src/client
-      dockerfile: ./app/src/client/Dockerfile
-      target: ""
-    secrets: inherit
+    build-and-push:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Build and push UI
+              uses: ./.github/actions/build-and-push
+              with:
+                  app_name: ui
+                  context: ./app/src/client
+                  dockerfile: ./app/src/client/Dockerfile
+                  target: ""
