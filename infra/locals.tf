@@ -4,9 +4,8 @@ locals {
       Project     = var.project_name
       Environment = var.environment
       ManagedBy   = "terraform"
-      service     = "rewards"
-      owner       = "candidate"
-      cost_center = "payments"
+      Service     = "rewards"
+      CostCenter  = "payments"
     },
     var.additional_tags
   )
