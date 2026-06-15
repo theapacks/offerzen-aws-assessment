@@ -6,6 +6,7 @@ on:
             - main
         paths:
             - app/src/client/**
+            - .github/actions/build-and-push/**
             - .github/workflows/ui.yml
     workflow_dispatch:
 
