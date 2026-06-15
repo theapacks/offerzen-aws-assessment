@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rewards Service</title>
+</head>
+
+<body>
+    <h1>Rewards Service</h1>
+    <button onclick="checkHealth()">Check Health</button>
+    <pre id="output"></pre>
+
+    <!-- config.js is generated at container startup and sets window.SERVER_URL -->
+    <script src="/config.js"></script>
+    <script>
+        const SERVER_URL = window.SERVER_URL || 'http://localhost:3011';
+
+        async function checkHealth() {
+            const output = document.getElementById('output');
+            try {
+                const res = await fetch(SERVER_URL + '/health');
+                const data = await res.json();
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                output.textContent = 'Error: ' + err.message;
+            }
+        }
+    </script>
+</body>
+
+</html>
