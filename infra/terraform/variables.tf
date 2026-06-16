@@ -132,3 +132,17 @@ variable "runner_ssh_security_group_ids" {
   type        = list(string)
   default     = []
 }
+
+variable "monitoring" {
+  description = "Monitoring and alerting configuration for CloudWatch alarms and SNS notifications."
+  type = object({
+    enabled                            = optional(bool, true)
+    alarm_email_endpoint               = optional(string, null)
+    alb_5xx_threshold                  = optional(number, 10)
+    alb_target_response_time_threshold = optional(number, 1.5)
+    unhealthy_host_count_threshold     = optional(number, 1)
+    evaluation_periods                 = optional(number, 2)
+    period_seconds                     = optional(number, 300)
+  })
+  default = {}
+}
