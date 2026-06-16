@@ -72,6 +72,28 @@ resource "aws_security_group" "app" {
     security_groups = [aws_security_group.backend_alb.id]
   }
 
+  dynamic "ingress" {
+    for_each = var.runner_ssh_cidr_blocks
+    content {
+      description = "Allow SSH from runner CIDR"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = var.runner_ssh_security_group_ids
+    content {
+      description     = "Allow SSH from runner security group"
+      from_port       = 22
+      to_port         = 22
+      protocol        = "tcp"
+      security_groups = [ingress.value]
+    }
+  }
+
   egress {
     description = "Allow all outbound traffic"
     from_port   = 0
@@ -97,6 +119,28 @@ resource "aws_security_group" "ui_instance" {
     to_port         = try(var.ui_listener_ports[0], 80)
     protocol        = "tcp"
     security_groups = [aws_security_group.ui_alb.id]
+  }
+
+  dynamic "ingress" {
+    for_each = var.runner_ssh_cidr_blocks
+    content {
+      description = "Allow SSH from runner CIDR"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = var.runner_ssh_security_group_ids
+    content {
+      description     = "Allow SSH from runner security group"
+      from_port       = 22
+      to_port         = 22
+      protocol        = "tcp"
+      security_groups = [ingress.value]
+    }
   }
 
   egress {

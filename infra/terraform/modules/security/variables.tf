@@ -37,6 +37,18 @@ variable "app_port" {
   default     = 8080
 }
 
+variable "runner_ssh_cidr_blocks" {
+  description = "CIDR blocks allowed to SSH into compute instances."
+  type        = list(string)
+  default     = []
+}
+
+variable "runner_ssh_security_group_ids" {
+  description = "Security group IDs allowed to SSH into compute instances."
+  type        = list(string)
+  default     = []
+}
+
 variable "tags" {
   description = "Common tags to apply to resources."
   type        = map(string)

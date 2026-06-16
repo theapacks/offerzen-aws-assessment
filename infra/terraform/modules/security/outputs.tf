@@ -26,10 +26,10 @@ output "backend_instance_security_group_id" {
 output "security_group_ids" {
   description = "All security groups created by this module."
   value = {
-    ui_alb      = aws_security_group.ui_alb.id
-    backend_alb = aws_security_group.backend_alb.id
-    app         = aws_security_group.app.id
-    ui_instance = aws_security_group.ui_instance.id
+    ui_alb           = aws_security_group.ui_alb.id
+    backend_alb      = aws_security_group.backend_alb.id
+    app              = aws_security_group.app.id
+    ui_instance      = aws_security_group.ui_instance.id
     backend_instance = aws_security_group.app.id
   }
 }
