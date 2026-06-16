@@ -79,3 +79,13 @@ output "github_actions_role_arn" {
   value       = aws_iam_role.github_actions_ecr.arn
 }
 
+output "monitoring_alerts_topic_arn" {
+  description = "SNS topic ARN used for infrastructure alerts."
+  value       = try(module.monitoring[0].sns_topic_arn, null)
+}
+
+output "monitoring_alarm_names" {
+  description = "CloudWatch alarm names created for basic infrastructure monitoring."
+  value       = try(module.monitoring[0].alarm_names, [])
+}
+

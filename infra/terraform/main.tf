@@ -92,4 +92,27 @@ module "backend_asg" {
   tags                      = local.common_tags
 }
 
+module "monitoring" {
+  count  = try(var.monitoring.enabled, true) ? 1 : 0
+  source = "./modules/monitoring"
+
+  project_name                       = var.project_name
+  environment                        = var.environment
+  tags                               = local.common_tags
+  ui_alb_arn_suffix                  = module.load_balancer.load_balancers["ui"].arn_suffix
+  backend_alb_arn_suffix             = module.load_balancer.load_balancers["backend"].arn_suffix
+  ui_target_group_arn_suffix         = module.load_balancer.load_balancers["ui"].target_group_arn_suffix
+  backend_target_group_arn_suffix    = module.load_balancer.load_balancers["backend"].target_group_arn_suffix
+  ui_asg_name                        = module.ui_asg.asg_name
+  backend_asg_name                   = module.backend_asg.asg_name
+  ui_desired_capacity                = var.compute_tiers["ui"].desired_capacity
+  backend_desired_capacity           = var.compute_tiers["backend"].desired_capacity
+  alarm_email_endpoint               = try(var.monitoring.alarm_email_endpoint, null)
+  alb_5xx_threshold                  = try(var.monitoring.alb_5xx_threshold, 10)
+  alb_target_response_time_threshold = try(var.monitoring.alb_target_response_time_threshold, 1.5)
+  unhealthy_host_count_threshold     = try(var.monitoring.unhealthy_host_count_threshold, 1)
+  evaluation_periods                 = try(var.monitoring.evaluation_periods, 2)
+  period_seconds                     = try(var.monitoring.period_seconds, 300)
+}
+
 
