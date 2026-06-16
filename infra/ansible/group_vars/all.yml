@@ -1,0 +1,19 @@
+container_runtime_user: ec2-user
+
+aws_region: eu-west-2
+ecr_registry: 830822530678.dkr.ecr.eu-west-2.amazonaws.com
+project_name: offerzen-aws-assessment
+environment: dev
+
+image_tag: "{{ lookup('env', 'IMAGE_TAG') | default('78cf0afb069d1d6fc370bde45f0402ae0065eaa2', true) }}"
+
+backend_container_name: rewards-backend
+backend_image: "{{ ecr_registry }}/{{ project_name }}/{{ environment }}/backend:{{ image_tag }}"
+backend_container_port: 3011
+backend_host_port: 3011
+
+ui_container_name: rewards-ui
+ui_image: "{{ ecr_registry }}/{{ project_name }}/{{ environment }}/ui:{{ image_tag }}"
+ui_container_port: 80
+ui_host_port: 80
+ui_server_url: http://localhost:3011
