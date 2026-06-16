@@ -25,9 +25,11 @@ module "security" {
     try(var.load_balancers["ui"].enable_http, true) ? [try(var.load_balancers["ui"].listener_port, 80)] : [],
     try(var.load_balancers["ui"].enable_https, false) ? [443] : []
   )
-  backend_listener_port = try(var.load_balancers["backend"].listener_port, 8080)
-  app_port              = try(var.load_balancers["backend"].target_port, 8080)
-  tags                  = local.common_tags
+  backend_listener_port         = try(var.load_balancers["backend"].listener_port, 8080)
+  app_port                      = try(var.load_balancers["backend"].target_port, 8080)
+  runner_ssh_cidr_blocks        = var.runner_ssh_cidr_blocks
+  runner_ssh_security_group_ids = var.runner_ssh_security_group_ids
+  tags                          = local.common_tags
 }
 
 module "load_balancer" {
@@ -51,39 +53,43 @@ module "load_balancer" {
 module "ui_asg" {
   source = "./modules/compute_asg"
 
-  project_name       = var.project_name
-  environment        = var.environment
-  tier_name          = "ui"
-  vpc_id             = module.network.vpc_id
-  subnet_ids         = module.network.public_subnet_ids
-  security_group_ids = [module.security.ui_instance_security_group_id]
-  target_group_arns  = [module.load_balancer.load_balancers["ui"].target_group_arn]
-  instance_type      = var.compute_tiers["ui"].instance_type
-  ami_id             = data.aws_ssm_parameter.al2023_ami.value
-  min_size           = var.compute_tiers["ui"].min_size
-  max_size           = var.compute_tiers["ui"].max_size
-  desired_capacity    = var.compute_tiers["ui"].desired_capacity
-  app_port            = try(var.load_balancers["ui"].target_port, 80)
-  tags                = local.common_tags
+  project_name              = var.project_name
+  environment               = var.environment
+  tier_name                 = "ui"
+  vpc_id                    = module.network.vpc_id
+  subnet_ids                = module.network.public_subnet_ids
+  security_group_ids        = [module.security.ui_instance_security_group_id]
+  target_group_arns         = [module.load_balancer.load_balancers["ui"].target_group_arn]
+  instance_type             = var.compute_tiers["ui"].instance_type
+  ami_id                    = data.aws_ssm_parameter.al2023_ami.value
+  iam_instance_profile_name = aws_iam_instance_profile.ec2_app.name
+  key_name                  = var.instance_key_name
+  min_size                  = var.compute_tiers["ui"].min_size
+  max_size                  = var.compute_tiers["ui"].max_size
+  desired_capacity          = var.compute_tiers["ui"].desired_capacity
+  app_port                  = try(var.load_balancers["ui"].target_port, 80)
+  tags                      = local.common_tags
 }
 
 module "backend_asg" {
   source = "./modules/compute_asg"
 
-  project_name       = var.project_name
-  environment        = var.environment
-  tier_name          = "backend"
-  vpc_id             = module.network.vpc_id
-  subnet_ids         = module.network.private_subnet_ids
-  security_group_ids = [module.security.backend_instance_security_group_id]
-  target_group_arns  = [module.load_balancer.load_balancers["backend"].target_group_arn]
-  instance_type      = var.compute_tiers["backend"].instance_type
-  ami_id             = data.aws_ssm_parameter.al2023_ami.value
-  min_size           = var.compute_tiers["backend"].min_size
-  max_size           = var.compute_tiers["backend"].max_size
-  desired_capacity    = var.compute_tiers["backend"].desired_capacity
-  app_port            = try(var.load_balancers["backend"].target_port, 8080)
-  tags                = local.common_tags
+  project_name              = var.project_name
+  environment               = var.environment
+  tier_name                 = "backend"
+  vpc_id                    = module.network.vpc_id
+  subnet_ids                = module.network.private_subnet_ids
+  security_group_ids        = [module.security.backend_instance_security_group_id]
+  target_group_arns         = [module.load_balancer.load_balancers["backend"].target_group_arn]
+  instance_type             = var.compute_tiers["backend"].instance_type
+  ami_id                    = data.aws_ssm_parameter.al2023_ami.value
+  iam_instance_profile_name = aws_iam_instance_profile.ec2_app.name
+  key_name                  = var.instance_key_name
+  min_size                  = var.compute_tiers["backend"].min_size
+  max_size                  = var.compute_tiers["backend"].max_size
+  desired_capacity          = var.compute_tiers["backend"].desired_capacity
+  app_port                  = try(var.load_balancers["backend"].target_port, 8080)
+  tags                      = local.common_tags
 }
 
 

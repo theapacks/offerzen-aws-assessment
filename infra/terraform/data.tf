@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "github_actions_trust" {
       values   = ["sts.amazonaws.com"]
     }
 
-     condition {
+    condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
       values   = ["repo:${var.github_repository}:*"]
@@ -69,5 +69,42 @@ data "aws_iam_policy_document" "ansible_inventory_read" {
       "ec2:DescribeTags",
     ]
     resources = ["*"]
+  }
+}
+
+data "aws_iam_policy_document" "ec2_assume_role" {
+  statement {
+    sid     = "EC2AssumeRole"
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "ec2_ecr_pull" {
+  statement {
+    sid    = "ECRGetAuthToken"
+    effect = "Allow"
+    actions = [
+      "ecr:GetAuthorizationToken",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ECRPullImages"
+    effect = "Allow"
+    actions = [
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchCheckLayerAvailability",
+    ]
+    resources = [
+      for repo in aws_ecr_repository.app : repo.arn
+    ]
   }
 }
