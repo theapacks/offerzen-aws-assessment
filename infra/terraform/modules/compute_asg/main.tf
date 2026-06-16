@@ -2,14 +2,22 @@ resource "aws_launch_template" "app_lt" {
   name_prefix   = "${var.project_name}-${var.environment}-${var.tier_name}-lt-"
   image_id      = var.ami_id
   instance_type = var.instance_type
+  key_name      = var.key_name
 
   vpc_security_group_ids = var.security_group_ids
+
+  dynamic "iam_instance_profile" {
+    for_each = var.iam_instance_profile_name == null ? [] : [var.iam_instance_profile_name]
+    content {
+      name = iam_instance_profile.value
+    }
+  }
 
   update_default_version = true
 }
 
 resource "aws_autoscaling_group" "app_asg" {
-  name                      = "${var.project_name}-${var.environment}-${var.tier_name}-asg"
+  name = "${var.project_name}-${var.environment}-${var.tier_name}-asg"
   launch_template {
     id      = aws_launch_template.app_lt.id
     version = "$Latest"
