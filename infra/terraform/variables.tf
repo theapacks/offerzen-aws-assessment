@@ -114,3 +114,21 @@ variable "github_repository" {
   description = "GitHub repository."
   type        = string
 }
+
+variable "instance_key_name" {
+  description = "Optional EC2 key pair name to attach to launch templates for SSH access."
+  type        = string
+  default     = null
+}
+
+variable "runner_ssh_cidr_blocks" {
+  description = "CIDR blocks allowed to SSH into application instances."
+  type        = list(string)
+  default     = []
+}
+
+variable "runner_ssh_security_group_ids" {
+  description = "Security group IDs allowed to SSH into application instances."
+  type        = list(string)
+  default     = []
+}
