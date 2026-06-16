@@ -55,3 +55,19 @@ data "aws_iam_policy_document" "ecr_push" {
     ]
   }
 }
+
+data "aws_iam_policy_document" "ansible_inventory_read" {
+  statement {
+    sid    = "EC2DescribeForAnsibleInventory"
+    effect = "Allow"
+    actions = [
+      "ec2:DescribeInstances",
+      "ec2:DescribeNetworkInterfaces",
+      "ec2:DescribeVpcs",
+      "ec2:DescribeSubnets",
+      "ec2:DescribeSecurityGroups",
+      "ec2:DescribeTags",
+    ]
+    resources = ["*"]
+  }
+}
