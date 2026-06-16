@@ -1,0 +1,8 @@
+# Copy this file to backend.hcl and update bucket after running bootstrap.
+# Retrieve bucket name from: terraform -chdir=bootstrap output state_bucket_name
+
+bucket       = "replace-with-state-bucket-name"
+key          = "dev/terraform.tfstate"
+region       = "eu-west-2"
+encrypt      = true
+use_lockfile = true
