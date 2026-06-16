@@ -43,6 +43,18 @@ variable "ami_id" {
   type        = string
 }
 
+variable "iam_instance_profile_name" {
+  description = "Optional IAM instance profile name for EC2 instances."
+  type        = string
+  default     = null
+}
+
+variable "key_name" {
+  description = "Optional EC2 key pair name for SSH access."
+  type        = string
+  default     = null
+}
+
 variable "min_size" {
   description = "The minimum number of EC2 instances in the Auto Scaling Group"
   type        = number
