@@ -54,3 +54,13 @@ runner_ssh_security_group_ids = []
 additional_tags = {
   Owner = "platform-team"
 }
+
+monitoring = {
+  enabled                            = true
+  alarm_email_endpoint               = null
+  alb_5xx_threshold                  = 10
+  alb_target_response_time_threshold = 1.5
+  unhealthy_host_count_threshold     = 1
+  evaluation_periods                 = 2
+  period_seconds                     = 300
+}
