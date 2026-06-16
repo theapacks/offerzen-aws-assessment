@@ -46,6 +46,11 @@ compute_tiers = {
 
 github_repository = "owner/repo-name"
 
+instance_key_name = null
+
+runner_ssh_cidr_blocks       = []
+runner_ssh_security_group_ids = []
+
 additional_tags = {
   Owner = "platform-team"
 }
