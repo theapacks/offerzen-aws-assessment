@@ -13,6 +13,16 @@ resource "aws_launch_template" "app_lt" {
     }
   }
 
+  user_data = base64encode(<<-EOF
+    #!/bin/bash
+    set -euo pipefail
+    if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi
+    $PM install -y docker
+    systemctl enable --now docker
+    $PM install -y awscli
+  EOF
+  )
+
   update_default_version = true
 }
 
