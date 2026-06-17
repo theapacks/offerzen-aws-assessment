@@ -10,6 +10,7 @@
 <body>
     <h1>Rewards Service</h1>
     <button onclick="checkHealth()">Check Health</button>
+    <button onclick="revealSecret()">Reveal Secret</button>
     <pre id="output"></pre>
 
     <!-- config.js is generated at container startup and sets window.SERVER_URL -->
@@ -22,6 +23,23 @@
             try {
                 const res = await fetch(SERVER_URL + '/health');
                 const data = await res.json();
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                output.textContent = 'Error: ' + err.message;
+            }
+        }
+
+        async function revealSecret() {
+            const output = document.getElementById('output');
+            try {
+                const res = await fetch(SERVER_URL + '/secret');
+                const data = await res.json();
+
+                if (!res.ok) {
+                    output.textContent = 'Error: ' + (data.error || 'Unable to fetch secret');
+                    return;
+                }
+
                 output.textContent = JSON.stringify(data, null, 2);
             } catch (err) {
                 output.textContent = 'Error: ' + err.message;
