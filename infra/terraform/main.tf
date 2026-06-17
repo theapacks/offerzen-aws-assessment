@@ -27,11 +27,12 @@ module "security" {
     try(var.load_balancers["ui"].enable_http, true) ? [try(var.load_balancers["ui"].listener_port, 80)] : [],
     try(var.load_balancers["ui"].enable_https, false) ? [443] : []
   )
-  backend_listener_port         = try(var.load_balancers["backend"].listener_port, 8080)
-  app_port                      = try(var.load_balancers["backend"].target_port, 8080)
-  runner_ssh_cidr_blocks        = var.runner_ssh_cidr_blocks
-  runner_ssh_security_group_ids = var.runner_ssh_security_group_ids
-  tags                          = local.common_tags
+  backend_listener_port           = try(var.load_balancers["backend"].listener_port, 3011)
+  backend_alb_allowed_cidr_blocks = try(var.load_balancers["backend"].allowed_cidr_blocks, ["0.0.0.0/0"])
+  app_port                        = try(var.load_balancers["backend"].target_port, 3011)
+  runner_ssh_cidr_blocks          = var.runner_ssh_cidr_blocks
+  runner_ssh_security_group_ids   = var.runner_ssh_security_group_ids
+  tags                            = local.common_tags
 }
 
 module "load_balancer" {

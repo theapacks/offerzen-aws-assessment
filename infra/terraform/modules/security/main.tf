@@ -34,15 +34,15 @@ resource "aws_security_group" "ui_alb" {
 
 resource "aws_security_group" "backend_alb" {
   name        = "${local.name_prefix}-backend-alb-sg"
-  description = "Internal backend ALB security group"
+  description = "Backend ALB security group"
   vpc_id      = var.vpc_id
 
   ingress {
-    description     = "Allow UI ALB to reach backend ALB"
-    from_port       = var.backend_listener_port
-    to_port         = var.backend_listener_port
-    protocol        = "tcp"
-    security_groups = [aws_security_group.ui_alb.id]
+    description = "Allow inbound traffic to backend ALB"
+    from_port   = var.backend_listener_port
+    to_port     = var.backend_listener_port
+    protocol    = "tcp"
+    cidr_blocks = var.backend_alb_allowed_cidr_blocks
   }
 
   egress {
@@ -55,7 +55,7 @@ resource "aws_security_group" "backend_alb" {
 
   tags = merge(var.tags, {
     Name = "${local.name_prefix}-backend-alb-sg"
-    Tier = "private"
+    Tier = "public"
   })
 }
 
