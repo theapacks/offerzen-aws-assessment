@@ -41,6 +41,20 @@ variable "create_internet_gateway" {
   default     = true
 }
 
+variable "vpc_endpoints" {
+  description = "Map of VPC endpoints to create. Key is a short name used in resource naming. Interface endpoints attach to subnets; Gateway endpoints attach to route tables."
+  type = map(object({
+    service_name = string
+    type         = string # "Interface" or "Gateway"
+  }))
+  default = {}
+}
+
+variable "aws_region" {
+  description = "AWS region for the resources."
+  type        = string
+}
+
 variable "tags" {
   description = "Common tags to apply to resources."
   type        = map(string)
