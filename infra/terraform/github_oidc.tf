@@ -40,6 +40,14 @@ resource "aws_iam_role_policy" "github_actions_ssm_deploy" {
         Resource = "*"
       },
       {
+        Sid    = "TagGetResources"
+        Effect = "Allow"
+        Action = [
+          "tag:GetResources"
+        ]
+        Resource = "*"
+      },
+      {
         Sid    = "PassSSMAutomationRole"
         Effect = "Allow"
         Action = ["iam:PassRole"]
