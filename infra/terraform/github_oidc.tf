@@ -22,3 +22,37 @@ resource "aws_iam_role_policy" "github_actions_ecr" {
   policy = data.aws_iam_policy_document.ecr_push.json
 }
 
+resource "aws_iam_role_policy" "github_actions_ssm_deploy" {
+  name = "ssm-deploy"
+  role = aws_iam_role.github_actions_ecr.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "SSMStartAutomation"
+        Effect = "Allow"
+        Action = [
+          "ssm:StartAutomationExecution",
+          "ssm:GetAutomationExecution",
+          "ssm:DescribeAutomationExecutions"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "PassSSMAutomationRole"
+        Effect = "Allow"
+        Action = ["iam:PassRole"]
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.project_name}-${var.environment}-ssm-automation"
+        ]
+        Condition = {
+          StringEquals = {
+            "iam:PassedToService" = "ssm.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+

@@ -47,12 +47,13 @@ load_balancers = {
     enable_http = true
   }
   backend = {
-    internal           = true
-    subnet_type        = "private"
-    enable_http        = true
-    target_port        = 8080
-    listener_port      = 8080
-    allowed_cidr_blocks = ["10.0.0.0/16"]
+    internal            = false
+    subnet_type         = "public"
+    enable_http         = true
+    target_port         = 3011
+    listener_port       = 3011
+    health_check_path   = "/health"
+    allowed_cidr_blocks = ["0.0.0.0/0"]
   }
 }
 

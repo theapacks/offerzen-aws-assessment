@@ -1,0 +1,65 @@
+name: Deploy via SSM Automation
+description: Trigger SSM Automation document to deploy a container to EC2 instances
+
+inputs:
+  document_name:
+    description: SSM Automation document name
+    required: true
+  image_tag:
+    description: Container image tag to deploy
+    required: true
+  automation_role_arn:
+    description: IAM role ARN for SSM Automation to assume
+    required: true
+  target_tag_value:
+    description: Value of the Name tag to target instances
+    required: true
+  aws_region:
+    description: AWS region
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Trigger SSM Automation
+      shell: bash
+      run: |
+        echo "Triggering SSM Automation: ${{ inputs.document_name }}"
+        echo "Image tag: ${{ inputs.image_tag }}"
+        echo "Target instances: ${{ inputs.target_tag_value }}"
+
+        EXECUTION_ID=$(aws ssm start-automation-execution \
+          --document-name "${{ inputs.document_name }}" \
+          --parameters "AutomationAssumeRole=${{ inputs.automation_role_arn }},ImageTag=${{ inputs.image_tag }}" \
+          --target-parameter-name InstanceId \
+          --targets "Key=tag:Name,Values=${{ inputs.target_tag_value }}" \
+          --region "${{ inputs.aws_region }}" \
+          --query 'AutomationExecutionId' \
+          --output text)
+
+        echo "Automation execution started: $EXECUTION_ID"
+        echo "execution_id=$EXECUTION_ID" >> "$GITHUB_OUTPUT"
+
+        # Wait for completion (timeout after 5 minutes)
+        for i in $(seq 1 30); do
+          STATUS=$(aws ssm get-automation-execution \
+            --automation-execution-id "$EXECUTION_ID" \
+            --region "${{ inputs.aws_region }}" \
+            --query 'AutomationExecution.AutomationExecutionStatus' \
+            --output text)
+
+          echo "Status: $STATUS"
+
+          if [ "$STATUS" = "Success" ]; then
+            echo "Deployment succeeded!"
+            exit 0
+          elif [ "$STATUS" = "Failed" ] || [ "$STATUS" = "Cancelled" ] || [ "$STATUS" = "TimedOut" ]; then
+            echo "Deployment failed with status: $STATUS"
+            exit 1
+          fi
+
+          sleep 10
+        done
+
+        echo "Timed out waiting for deployment"
+        exit 1

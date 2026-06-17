@@ -19,6 +19,61 @@ locals {
   ] : []
 }
 
+data "aws_iam_policy_document" "ssm_automation_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ssm.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ssm_automation" {
+  name               = "${local.name_prefix}-ssm-automation"
+  assume_role_policy = data.aws_iam_policy_document.ssm_automation_assume.json
+  tags               = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ssm_automation" {
+  role       = aws_iam_role.ssm_automation.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonSSMAutomationRole"
+}
+
+resource "aws_iam_role_policy" "ssm_automation_run_command" {
+  name = "ssm-run-command"
+  role = aws_iam_role.ssm_automation.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowSendCommand"
+        Effect = "Allow"
+        Action = [
+          "ssm:SendCommand",
+          "ssm:ListCommands",
+          "ssm:ListCommandInvocations",
+          "ssm:GetCommandInvocation"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid      = "AllowPassRole"
+        Effect   = "Allow"
+        Action   = ["iam:PassRole"]
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "iam:PassedToService" = "ssm.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+
+
 resource "aws_ssm_document" "backend_deploy" {
   name            = "${local.name_prefix}-backend-deploy"
   document_type   = "Automation"
@@ -26,8 +81,18 @@ resource "aws_ssm_document" "backend_deploy" {
 
   content = jsonencode({
     schemaVersion = "0.3"
-    description   = "Install Docker and deploy backend container from ECR"
+    description   = "Deploy backend container from ECR"
+    assumeRole    = "{{ AutomationAssumeRole }}"
     parameters = {
+      AutomationAssumeRole = {
+        type        = "String"
+        description = "IAM role ARN for SSM Automation to assume."
+      }
+      ImageTag = {
+        type        = "String"
+        description = "Container image tag to deploy."
+        default     = var.image_tag
+      }
       InstanceId = {
         type = "StringList"
       }
@@ -43,10 +108,10 @@ resource "aws_ssm_document" "backend_deploy" {
             commands = concat([
               "set -euo pipefail",
               "aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${var.ecr_registry}",
-              "docker pull ${var.backend_image_repository}:${var.image_tag}",
+              "docker pull ${var.backend_image_repository}:{{ ImageTag }}",
               "docker rm -f ${var.backend_container_name} >/dev/null 2>&1 || true",
               ], local.backend_secret_setup_commands, [
-              "docker run -d --name ${var.backend_container_name} --restart always -p ${var.backend_host_port}:${var.backend_container_port} -e PORT=${var.backend_container_port}${local.backend_secret_env_file_arg} ${var.backend_image_repository}:${var.image_tag}",
+              "docker run -d --name ${var.backend_container_name} --restart always -p ${var.backend_host_port}:${var.backend_container_port} -e PORT=${var.backend_container_port}${local.backend_secret_env_file_arg} ${var.backend_image_repository}:{{ ImageTag }}",
             ], local.backend_secret_cleanup_commands)
           }
         }
@@ -64,8 +129,18 @@ resource "aws_ssm_document" "ui_deploy" {
 
   content = jsonencode({
     schemaVersion = "0.3"
-    description   = "Install Docker and deploy UI container from ECR"
+    description   = "Deploy UI container from ECR"
+    assumeRole    = "{{ AutomationAssumeRole }}"
     parameters = {
+      AutomationAssumeRole = {
+        type        = "String"
+        description = "IAM role ARN for SSM Automation to assume."
+      }
+      ImageTag = {
+        type        = "String"
+        description = "Container image tag to deploy."
+        default     = var.image_tag
+      }
       InstanceId = {
         type = "StringList"
       }
@@ -81,9 +156,9 @@ resource "aws_ssm_document" "ui_deploy" {
             commands = [
               "set -euo pipefail",
               "aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${var.ecr_registry}",
-              "docker pull ${var.ui_image_repository}:${var.image_tag}",
+              "docker pull ${var.ui_image_repository}:{{ ImageTag }}",
               "docker rm -f ${var.ui_container_name} >/dev/null 2>&1 || true",
-              "docker run -d --name ${var.ui_container_name} --restart always -p ${var.ui_host_port}:${var.ui_container_port} -e SERVER_URL=${var.ui_server_url} ${var.ui_image_repository}:${var.image_tag}"
+              "docker run -d --name ${var.ui_container_name} --restart always -p ${var.ui_host_port}:${var.ui_container_port} -e SERVER_URL=${var.ui_server_url} ${var.ui_image_repository}:{{ ImageTag }}"
             ]
           }
         }
@@ -99,10 +174,16 @@ resource "aws_ssm_association" "backend_deploy" {
   association_name                 = "${local.name_prefix}-backend-deploy"
   automation_target_parameter_name = "InstanceId"
 
+  parameters = {
+    AutomationAssumeRole = aws_iam_role.ssm_automation.arn
+  }
+
   targets {
     key    = "tag:Name"
     values = [var.backend_instance_name_tag]
   }
+
+  depends_on = [aws_iam_role_policy_attachment.ssm_automation]
 }
 
 resource "aws_ssm_association" "ui_deploy" {
@@ -110,8 +191,14 @@ resource "aws_ssm_association" "ui_deploy" {
   association_name                 = "${local.name_prefix}-ui-deploy"
   automation_target_parameter_name = "InstanceId"
 
+  parameters = {
+    AutomationAssumeRole = aws_iam_role.ssm_automation.arn
+  }
+
   targets {
     key    = "tag:Name"
     values = [var.ui_instance_name_tag]
   }
+
+  depends_on = [aws_iam_role_policy_attachment.ssm_automation]
 }

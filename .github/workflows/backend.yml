@@ -7,6 +7,7 @@ on:
         paths:
             - app/src/server/**
             - .github/actions/build-and-push/**
+            - .github/actions/deploy-ssm/**
             - .github/workflows/backend.yml
     workflow_dispatch:
 
@@ -33,4 +34,26 @@ jobs:
                   app_name: backend
                   context: ./app/src/server
                   dockerfile: ./app/src/server/Dockerfile
-                  target: production
+                  target: ""
+
+    deploy:
+        needs: build-and-push
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-region: ${{ env.AWS_REGION }}
+                  role-to-assume: ${{ env.AWS_ROLE_TO_ASSUME }}
+
+            - name: Deploy via SSM
+              uses: ./.github/actions/deploy-ssm
+              with:
+                  document_name: ${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-backend-deploy
+                  image_tag: ${{ github.sha }}
+                  automation_role_arn: ${{ secrets.SSM_AUTOMATION_ROLE_ARN }}
+                  target_tag_value: ${{ env.PROJECT_NAME }}-${{ env.ENVIRONMENT }}-backend-instance
+                  aws_region: ${{ env.AWS_REGION }}
