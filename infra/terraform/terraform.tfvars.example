@@ -71,6 +71,9 @@ ssm_deployment = {
   backend_container_name = "rewards-backend"
   backend_container_port = 3011
   backend_host_port      = 3011
+  backend_secret_parameters = {
+    APP_SECRET = "/offerzen-aws-assessment/dev/backend/app_secret"
+  }
   ui_container_name      = "rewards-ui"
   ui_container_port      = 80
   ui_host_port           = 80
