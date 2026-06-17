@@ -104,6 +104,15 @@ variable "create_internet_gateway" {
   default     = true
 }
 
+variable "vpc_endpoints" {
+  description = "Map of VPC endpoints to create. Key is a short name; value is an object with service_name and type (Interface or Gateway)."
+  type = map(object({
+    service_name = string
+    type         = string
+  }))
+  default = {}
+}
+
 variable "additional_tags" {
   description = "Additional resource tags merged with the common tags."
   type        = map(string)
