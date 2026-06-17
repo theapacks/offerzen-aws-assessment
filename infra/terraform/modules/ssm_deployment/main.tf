@@ -1,5 +1,22 @@
 locals {
-  name_prefix = "${var.project_name}-${var.environment}"
+  name_prefix             = "${var.project_name}-${var.environment}"
+  backend_secret_env_file = "/tmp/${var.project_name}-${var.environment}-backend-secrets.env"
+  backend_secret_setup_commands = concat(
+    length(var.backend_secret_parameters) > 0 ? [
+      "sudo rm -f ${local.backend_secret_env_file}",
+      "sudo install -m 600 /dev/null ${local.backend_secret_env_file}",
+    ] : [],
+    flatten([
+      for env_name, parameter_name in var.backend_secret_parameters : [
+        "backend_secret_value=$(aws ssm get-parameter --name '${parameter_name}' --with-decryption --query Parameter.Value --output text --region ${var.aws_region})",
+        "printf '%s=%s\\n' '${env_name}' \"$backend_secret_value\" | sudo tee -a ${local.backend_secret_env_file} >/dev/null",
+      ]
+    ])
+  )
+  backend_secret_env_file_arg = length(var.backend_secret_parameters) > 0 ? " --env-file ${local.backend_secret_env_file}" : ""
+  backend_secret_cleanup_commands = length(var.backend_secret_parameters) > 0 ? [
+    "sudo rm -f ${local.backend_secret_env_file}",
+  ] : []
 }
 
 resource "aws_ssm_document" "backend_deploy" {
@@ -23,7 +40,7 @@ resource "aws_ssm_document" "backend_deploy" {
           DocumentName = "AWS-RunShellScript"
           InstanceIds  = "{{ InstanceId }}"
           Parameters = {
-            commands = [
+            commands = concat([
               "set -euo pipefail",
               "if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi",
               "sudo $PM install -y docker awscli",
@@ -31,8 +48,9 @@ resource "aws_ssm_document" "backend_deploy" {
               "aws ecr get-login-password --region ${var.aws_region} | sudo docker login --username AWS --password-stdin ${var.ecr_registry}",
               "sudo docker pull ${var.backend_image_repository}:${var.image_tag}",
               "sudo docker rm -f ${var.backend_container_name} >/dev/null 2>&1 || true",
-              "sudo docker run -d --name ${var.backend_container_name} --restart always -p ${var.backend_host_port}:${var.backend_container_port} -e PORT=${var.backend_container_port} ${var.backend_image_repository}:${var.image_tag}"
-            ]
+              ], local.backend_secret_setup_commands, [
+              "sudo docker run -d --name ${var.backend_container_name} --restart always -p ${var.backend_host_port}:${var.backend_container_port} -e PORT=${var.backend_container_port}${local.backend_secret_env_file_arg} ${var.backend_image_repository}:${var.image_tag}",
+            ], local.backend_secret_cleanup_commands)
           }
         }
       }

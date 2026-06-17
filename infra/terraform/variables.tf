@@ -159,15 +159,16 @@ variable "monitoring" {
 variable "ssm_deployment" {
   description = "SSM Automation deployment configuration used to replace Ansible-based deployment."
   type = object({
-    enabled                = optional(bool, true)
-    image_tag              = optional(string, "latest")
-    backend_container_name = optional(string, "rewards-backend")
-    backend_container_port = optional(number, 3011)
-    backend_host_port      = optional(number, 3011)
-    ui_container_name      = optional(string, "rewards-ui")
-    ui_container_port      = optional(number, 80)
-    ui_host_port           = optional(number, 80)
-    ui_server_url          = optional(string, null)
+    enabled                   = optional(bool, true)
+    image_tag                 = optional(string, "latest")
+    backend_container_name    = optional(string, "rewards-backend")
+    backend_container_port    = optional(number, 3011)
+    backend_host_port         = optional(number, 3011)
+    ui_container_name         = optional(string, "rewards-ui")
+    ui_container_port         = optional(number, 80)
+    ui_host_port              = optional(number, 80)
+    ui_server_url             = optional(string, null)
+    backend_secret_parameters = optional(map(string), {})
   })
   default = {}
 }

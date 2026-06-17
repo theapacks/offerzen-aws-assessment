@@ -89,3 +89,9 @@ variable "backend_instance_name_tag" {
   description = "Value of the Name tag used to target backend instances."
   type        = string
 }
+
+variable "backend_secret_parameters" {
+  description = "Map of backend container environment variable names to SSM Parameter Store names."
+  type        = map(string)
+  default     = {}
+}
