@@ -139,7 +139,10 @@ module "ssm_deployment" {
   ui_server_url             = coalesce(try(var.ssm_deployment.ui_server_url, null), "http://${module.load_balancer.load_balancers["backend"].dns_name}:${try(var.load_balancers["backend"].listener_port, 8080)}")
   ui_instance_name_tag      = "${var.project_name}-${var.environment}-ui-instance"
   backend_instance_name_tag = "${var.project_name}-${var.environment}-backend-instance"
-  backend_secret_parameters = try(var.ssm_deployment.backend_secret_parameters, {})
+  backend_secret_parameters = merge(
+    { APP_SECRET = aws_ssm_parameter.app_secret.name },
+    try(var.ssm_deployment.backend_secret_parameters, {})
+  )
 }
 
 
