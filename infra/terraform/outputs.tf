@@ -89,3 +89,23 @@ output "monitoring_alarm_names" {
   value       = try(module.monitoring[0].alarm_names, [])
 }
 
+output "ssm_backend_automation_document_name" {
+  description = "Name of the backend SSM Automation document used for EC2 container deployment."
+  value       = try(module.ssm_deployment[0].backend_automation_document_name, null)
+}
+
+output "ssm_ui_automation_document_name" {
+  description = "Name of the UI SSM Automation document used for EC2 container deployment."
+  value       = try(module.ssm_deployment[0].ui_automation_document_name, null)
+}
+
+output "ssm_backend_association_id" {
+  description = "State Manager association ID for backend deployment automation."
+  value       = try(module.ssm_deployment[0].backend_association_id, null)
+}
+
+output "ssm_ui_association_id" {
+  description = "State Manager association ID for UI deployment automation."
+  value       = try(module.ssm_deployment[0].ui_association_id, null)
+}
+

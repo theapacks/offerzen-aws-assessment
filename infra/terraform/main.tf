@@ -117,4 +117,27 @@ module "monitoring" {
   period_seconds                     = try(var.monitoring.period_seconds, 300)
 }
 
+module "ssm_deployment" {
+  count  = try(var.ssm_deployment.enabled, true) ? 1 : 0
+  source = "./modules/ssm_deployment"
+
+  project_name              = var.project_name
+  environment               = var.environment
+  tags                      = local.common_tags
+  aws_region                = var.aws_region
+  image_tag                 = try(var.ssm_deployment.image_tag, "latest")
+  ecr_registry              = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com"
+  backend_image_repository  = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${local.ecr_repositories["backend"]}"
+  ui_image_repository       = "${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${local.ecr_repositories["ui"]}"
+  backend_container_name    = try(var.ssm_deployment.backend_container_name, "rewards-backend")
+  backend_container_port    = try(var.ssm_deployment.backend_container_port, 3011)
+  backend_host_port         = try(var.ssm_deployment.backend_host_port, 3011)
+  ui_container_name         = try(var.ssm_deployment.ui_container_name, "rewards-ui")
+  ui_container_port         = try(var.ssm_deployment.ui_container_port, 80)
+  ui_host_port              = try(var.ssm_deployment.ui_host_port, 80)
+  ui_server_url             = coalesce(try(var.ssm_deployment.ui_server_url, null), "http://${module.load_balancer.load_balancers["backend"].dns_name}:${try(var.load_balancers["backend"].listener_port, 8080)}")
+  ui_instance_name_tag      = "${var.project_name}-${var.environment}-ui-instance"
+  backend_instance_name_tag = "${var.project_name}-${var.environment}-backend-instance"
+}
+
 
