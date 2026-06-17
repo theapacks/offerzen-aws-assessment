@@ -28,19 +28,3 @@ resource "aws_iam_role_policy" "github_actions_ansible_inventory" {
   policy = data.aws_iam_policy_document.ansible_inventory_read.json
 }
 
-resource "aws_iam_role" "ec2_app" {
-  name               = "${var.project_name}-${var.environment}-ec2-app"
-  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
-  tags               = local.common_tags
-}
-
-resource "aws_iam_role_policy" "ec2_app_ecr_pull" {
-  name   = "ecr-pull"
-  role   = aws_iam_role.ec2_app.id
-  policy = data.aws_iam_policy_document.ec2_ecr_pull.json
-}
-
-resource "aws_iam_instance_profile" "ec2_app" {
-  name = "${var.project_name}-${var.environment}-ec2-app-profile"
-  role = aws_iam_role.ec2_app.name
-}
