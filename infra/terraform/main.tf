@@ -72,6 +72,11 @@ module "ui_asg" {
   desired_capacity          = var.compute_tiers["ui"].desired_capacity
   app_port                  = try(var.load_balancers["ui"].target_port, 80)
   tags                      = local.common_tags
+  user_data_extra           = <<-EOT
+    aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com
+    docker pull ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${local.ecr_repositories["ui"]}:${try(var.ssm_deployment.image_tag, "latest")}
+    docker run -d --name ${try(var.ssm_deployment.ui_container_name, "rewards-ui")} --restart always -p ${try(var.ssm_deployment.ui_host_port, 80)}:${try(var.ssm_deployment.ui_container_port, 80)} -e SERVER_URL=http://${module.load_balancer.load_balancers["backend"].dns_name}:${try(var.load_balancers["backend"].listener_port, 3011)} ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${local.ecr_repositories["ui"]}:${try(var.ssm_deployment.image_tag, "latest")}
+  EOT
 }
 
 module "backend_asg" {
@@ -91,8 +96,13 @@ module "backend_asg" {
   min_size                  = var.compute_tiers["backend"].min_size
   max_size                  = var.compute_tiers["backend"].max_size
   desired_capacity          = var.compute_tiers["backend"].desired_capacity
-  app_port                  = try(var.load_balancers["backend"].target_port, 8080)
+  app_port                  = try(var.load_balancers["backend"].target_port, 3011)
   tags                      = local.common_tags
+  user_data_extra           = <<-EOT
+    aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com
+    docker pull ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${local.ecr_repositories["backend"]}:${try(var.ssm_deployment.image_tag, "latest")}
+    docker run -d --name ${try(var.ssm_deployment.backend_container_name, "rewards-backend")} --restart always -p ${try(var.ssm_deployment.backend_host_port, 3011)}:${try(var.ssm_deployment.backend_container_port, 3011)} -e PORT=${try(var.ssm_deployment.backend_container_port, 3011)} ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/${local.ecr_repositories["backend"]}:${try(var.ssm_deployment.image_tag, "latest")}
+  EOT
 }
 
 module "monitoring" {

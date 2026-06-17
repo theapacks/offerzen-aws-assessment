@@ -17,9 +17,9 @@ resource "aws_launch_template" "app_lt" {
     #!/bin/bash
     set -euo pipefail
     if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi
-    $PM install -y docker
+    $PM install -y docker aws-cli
     systemctl enable --now docker
-    $PM install -y awscli
+    ${var.user_data_extra}
   EOF
   )
 
@@ -38,7 +38,7 @@ resource "aws_autoscaling_group" "app_asg" {
   vpc_zone_identifier       = var.subnet_ids
   target_group_arns         = var.target_group_arns
   health_check_type         = "ELB"
-  health_check_grace_period = 300
+  health_check_grace_period = 600
 
   tag {
     key                 = "Name"

@@ -84,3 +84,9 @@ variable "tags" {
   default     = {}
 }
 
+variable "user_data_extra" {
+  description = "Additional shell commands appended to the launch template user_data script (runs after Docker is installed)."
+  type        = string
+  default     = ""
+}
+
