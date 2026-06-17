@@ -26,15 +26,21 @@ variable "ui_listener_ports" {
 }
 
 variable "backend_listener_port" {
-  description = "Listener port exposed by the internal backend ALB."
+  description = "Listener port exposed by the backend ALB."
   type        = number
-  default     = 8080
+  default     = 3011
+}
+
+variable "backend_alb_allowed_cidr_blocks" {
+  description = "CIDR blocks allowed to access the backend ALB."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 variable "app_port" {
-  description = "Application port exposed by compute instances."
+  description = "Application port exposed by backend compute instances."
   type        = number
-  default     = 8080
+  default     = 3011
 }
 
 variable "runner_ssh_cidr_blocks" {
