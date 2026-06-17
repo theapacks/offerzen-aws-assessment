@@ -42,14 +42,11 @@ resource "aws_ssm_document" "backend_deploy" {
           Parameters = {
             commands = concat([
               "set -euo pipefail",
-              "if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi",
-              "sudo $PM install -y docker awscli",
-              "sudo systemctl enable --now docker",
-              "aws ecr get-login-password --region ${var.aws_region} | sudo docker login --username AWS --password-stdin ${var.ecr_registry}",
-              "sudo docker pull ${var.backend_image_repository}:${var.image_tag}",
-              "sudo docker rm -f ${var.backend_container_name} >/dev/null 2>&1 || true",
+              "aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${var.ecr_registry}",
+              "docker pull ${var.backend_image_repository}:${var.image_tag}",
+              "docker rm -f ${var.backend_container_name} >/dev/null 2>&1 || true",
               ], local.backend_secret_setup_commands, [
-              "sudo docker run -d --name ${var.backend_container_name} --restart always -p ${var.backend_host_port}:${var.backend_container_port} -e PORT=${var.backend_container_port}${local.backend_secret_env_file_arg} ${var.backend_image_repository}:${var.image_tag}",
+              "docker run -d --name ${var.backend_container_name} --restart always -p ${var.backend_host_port}:${var.backend_container_port} -e PORT=${var.backend_container_port}${local.backend_secret_env_file_arg} ${var.backend_image_repository}:${var.image_tag}",
             ], local.backend_secret_cleanup_commands)
           }
         }
@@ -83,13 +80,10 @@ resource "aws_ssm_document" "ui_deploy" {
           Parameters = {
             commands = [
               "set -euo pipefail",
-              "if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi",
-              "sudo $PM install -y docker awscli",
-              "sudo systemctl enable --now docker",
-              "aws ecr get-login-password --region ${var.aws_region} | sudo docker login --username AWS --password-stdin ${var.ecr_registry}",
-              "sudo docker pull ${var.ui_image_repository}:${var.image_tag}",
-              "sudo docker rm -f ${var.ui_container_name} >/dev/null 2>&1 || true",
-              "sudo docker run -d --name ${var.ui_container_name} --restart always -p ${var.ui_host_port}:${var.ui_container_port} -e SERVER_URL=${var.ui_server_url} ${var.ui_image_repository}:${var.image_tag}"
+              "aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${var.ecr_registry}",
+              "docker pull ${var.ui_image_repository}:${var.image_tag}",
+              "docker rm -f ${var.ui_container_name} >/dev/null 2>&1 || true",
+              "docker run -d --name ${var.ui_container_name} --restart always -p ${var.ui_host_port}:${var.ui_container_port} -e SERVER_URL=${var.ui_server_url} ${var.ui_image_repository}:${var.image_tag}"
             ]
           }
         }
