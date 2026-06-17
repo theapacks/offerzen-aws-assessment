@@ -11,6 +11,8 @@ module "network" {
   public_subnets          = var.public_subnets
   private_subnets         = var.private_subnets
   create_internet_gateway = var.create_internet_gateway
+  vpc_endpoints           = var.vpc_endpoints
+  aws_region              = var.aws_region
   tags                    = local.common_tags
 }
 
