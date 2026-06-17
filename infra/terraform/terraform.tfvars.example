@@ -13,6 +13,33 @@ private_subnets = {
 }
 create_internet_gateway = true
 
+vpc_endpoints = {
+  ssm = {
+    service_name = "ssm"
+    type         = "Interface"
+  }
+  ssmmessages = {
+    service_name = "ssmmessages"
+    type         = "Interface"
+  }
+  ec2messages = {
+    service_name = "ec2messages"
+    type         = "Interface"
+  }
+  ecr_api = {
+    service_name = "ecr.api"
+    type         = "Interface"
+  }
+  ecr_dkr = {
+    service_name = "ecr.dkr"
+    type         = "Interface"
+  }
+  s3 = {
+    service_name = "s3"
+    type         = "Gateway"
+  }
+}
+
 load_balancers = {
   ui = {
     internal    = false
