@@ -22,9 +22,3 @@ resource "aws_iam_role_policy" "github_actions_ecr" {
   policy = data.aws_iam_policy_document.ecr_push.json
 }
 
-resource "aws_iam_role_policy" "github_actions_ansible_inventory" {
-  name   = "ansible-inventory-read"
-  role   = aws_iam_role.github_actions_ecr.id
-  policy = data.aws_iam_policy_document.ansible_inventory_read.json
-}
-
