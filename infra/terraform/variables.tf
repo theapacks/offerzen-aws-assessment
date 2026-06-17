@@ -157,7 +157,7 @@ variable "monitoring" {
 }
 
 variable "ssm_deployment" {
-  description = "SSM Automation deployment configuration used to replace Ansible-based deployment."
+  description = "SSM Automation deployment configuration for application rollout."
   type = object({
     enabled                   = optional(bool, true)
     image_tag                 = optional(string, "latest")
