@@ -86,3 +86,33 @@ Each environment gets its own state file path (`dev/terraform.tfstate`, `prod/te
 The state bucket itself is bootstrapped by a separate Terraform root (`infra/terraform/bootstrap/`) that uses local state. This avoids the circular dependency of needing a remote backend to create the remote backend.
 
 S3 native lock files (`use_lockfile = true`) prevent concurrent applies from corrupting state. 
+
+
+
+## AI Prompts
+
+
+## Gen AI Prompts Used
+
+The following prompts were used during development of this project with AI-assisted tooling.
+
+### Application development
+
+**Adding client-side JavaScript to call the backend:**
+
+> "In the app/src/client directory, add vanilla javascript to make http requests to the backend to do the following:
+> 1. checkHealth(): do an http get request on the /health endpoint of the backend
+> 2. revealSecret(): do an http get request on the /secret endpoint to get the secret
+>
+> The functions will then be used as onClick event handlers for the two buttons "Check Health" and "Reveal Secret"
+> Once done, review the Dockerfiles, introduce multi-stage builds as seen here https://docs.docker.com/guides/nodejs/containerize/"
+
+### Infrastructure review and fixes
+
+**Generating Ansible playbooks for EC2 configuration:**
+
+> "As an Ansible expert generate for me ansible code in the directory ./infra/ansible. Ansible must install docker and the aws cli to the EC2 instances defined in ./infra/terraform/modules/compute_asg. Try to keep it simple and beginner friendly. Feel free to ask any questions should you need more clarity."
+
+**Reviewing Terraform configuration for correctness:**
+
+> "Review this project and ensure that it will work when I do terraform apply. Ensure best practices are followed and correct any misconfigurations. Ignore ansible. We will use SSM automation document. "
