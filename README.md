@@ -114,4 +114,3 @@ infra/terraform/
 - Docker for NodeJS: https://docs.docker.com/guides/nodejs/containerize/
 - Express JS: https://expressjs.com/en/
 - Terraform AWS Provider: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
-- Ansible AWS Collection: https://docs.ansible.com/ansible/latest/collections/amazon/aws/
