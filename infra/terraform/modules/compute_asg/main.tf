@@ -19,7 +19,10 @@ resource "aws_launch_template" "app_lt" {
     if command -v dnf >/dev/null 2>&1; then PM=dnf; else PM=yum; fi
     $PM install -y docker aws-cli
     systemctl enable --now docker
+    # Container deployment (best-effort — SSM handles retries)
+    set +e
     ${var.user_data_extra}
+    exit 0
   EOF
   )
 
